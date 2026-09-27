@@ -24,16 +24,34 @@ namespace ContextForge
             tvSolutionStructure.CheckBoxes = true;
             tvSolutionStructure.AfterCheck += TvSolutionStructure_AfterCheck;
 
-            BtnRefresh.Click += BtnRefresh_Click;
-            BtnClear.Click += BtnClear_Click;
-
             txtFilter.TextChanged += TxtFilter_TextChanged;
 
-            this.KeyPreview = true;
-            this.KeyDown += FrmMain_KeyDown;
+            KeyPreview = true;
+            KeyDown += FrmMain_KeyDown;
+
+            UpdateMenuState();
         }
 
-        private void BtnClear_Click(object sender, EventArgs e)
+        #region Menu handlers
+
+        private void OpenFolderMenuItem_Click(object? sender, EventArgs e)
+        {
+            using FolderBrowserDialog folderBrowserDialog = new();
+
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                checkedPaths.Clear();
+                currentRootPath = folderBrowserDialog.SelectedPath;
+                Text = $"ContextForge - {currentRootPath}";
+                PopulateTreeView(currentRootPath);
+                UpdateDisplays();
+                UpdateMenuState();
+            }
+        }
+
+        private void RefreshMenuItem_Click(object? sender, EventArgs e) => RebuildTree();
+
+        private void ClearMenuItem_Click(object? sender, EventArgs e)
         {
             txtFilter.Clear();
             checkedPaths.Clear();
@@ -51,6 +69,66 @@ namespace ContextForge
             }
         }
 
+        private void ExitMenuItem_Click(object? sender, EventArgs e) => Close();
+
+        private void ManageExclusionsMenuItem_Click(object? sender, EventArgs e)
+        {
+            using var exclusionsDialog = new ExclusionsDialog(excludedDirectories);
+
+            if (exclusionsDialog.ShowDialog() == DialogResult.OK)
+            {
+                excludedDirectories.Clear();
+                excludedDirectories.AddRange(exclusionsDialog.ExcludedDirectories);
+                SaveExclusions();
+                RebuildTree();
+            }
+        }
+
+        private void ReloadExclusionsMenuItem_Click(object? sender, EventArgs e)
+        {
+            LoadExclusions();
+            MessageBox.Show("Exclusions loaded successfully!", "Load Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            RebuildTree();
+        }
+
+        private void CopyStructure_Click(object? sender, EventArgs e) =>
+            CopyToClipboard(txtSolutionStructureResults, btnCopyStructure, "Copy Structure");
+
+        private void CopyCode_Click(object? sender, EventArgs e) =>
+            CopyToClipboard(txtCodeResults, btnCopyCode, "Copy Code");
+
+        private static async void CopyToClipboard(RichTextBox source, Button feedbackButton, string label)
+        {
+            if (string.IsNullOrEmpty(source.Text))
+                return;
+
+            Clipboard.SetText(source.Text);
+
+            feedbackButton.Text = "Copied ✓";
+            await Task.Delay(1500);
+            feedbackButton.Text = label;
+        }
+
+        private void UpdateMenuState()
+        {
+            bool hasRoot = !string.IsNullOrEmpty(currentRootPath);
+            refreshMenuItem.Enabled = hasRoot;
+            btnRefresh.Enabled = hasRoot;
+            clearMenuItem.Enabled = hasRoot;
+        }
+
+        private void RebuildTree()
+        {
+            if (string.IsNullOrEmpty(currentRootPath))
+                return;
+
+            PopulateTreeView(currentRootPath);
+            RestoreTreeState(tvSolutionStructure.Nodes, []);
+            UpdateDisplays();
+        }
+
+        #endregion
+
         private static void UncheckAllNodes(TreeNodeCollection nodes)
         {
             foreach (TreeNode node in nodes)
@@ -60,13 +138,13 @@ namespace ContextForge
             }
         }
 
-        private void TxtFilter_TextChanged(object sender, EventArgs e)
+        private void TxtFilter_TextChanged(object? sender, EventArgs e)
         {
             currentFilter = txtFilter.Text;
             ApplyFilter();
         }
 
-        private void FrmMain_KeyDown(object sender, KeyEventArgs e)
+        private void FrmMain_KeyDown(object? sender, KeyEventArgs e)
         {
             if (tvSolutionStructure.Focused)
             {
@@ -145,48 +223,6 @@ namespace ContextForge
             }
         }
 
-        private void BtnManageExclusions_Click(object sender, EventArgs e)
-        {
-            using var exclusionsDialog = new ExclusionsDialog(excludedDirectories);
-
-            if (exclusionsDialog.ShowDialog() == DialogResult.OK)
-            {
-                excludedDirectories.Clear();
-                excludedDirectories.AddRange(exclusionsDialog.ExcludedDirectories);
-                SaveExclusions();
-
-                if (!string.IsNullOrEmpty(currentRootPath))
-                {
-                    PopulateTreeView(currentRootPath);
-                    RestoreTreeState(tvSolutionStructure.Nodes, []);
-                    UpdateDisplays();
-                }
-            }
-        }
-
-        private void BtnRefresh_Click(object? sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(currentRootPath))
-            {
-                PopulateTreeView(currentRootPath);
-                RestoreTreeState(tvSolutionStructure.Nodes, []);
-                UpdateDisplays();
-            }
-        }
-
-        private void BtnBrowse_Click(object sender, EventArgs e)
-        {
-            using FolderBrowserDialog folderBrowserDialog = new();
-
-            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-            {
-                checkedPaths.Clear();
-                currentRootPath = folderBrowserDialog.SelectedPath;
-                PopulateTreeView(currentRootPath);
-                UpdateDisplays();
-            }
-        }
-
         private void PopulateTreeView(string path)
         {
             tvSolutionStructure.Nodes.Clear();
@@ -243,7 +279,6 @@ namespace ContextForge
                    file.Name.Contains(currentFilter, StringComparison.OrdinalIgnoreCase);
         }
 
-        // Clean, synchronous event handler
         private void TvSolutionStructure_AfterCheck(object? sender, TreeViewEventArgs e)
         {
             if (e.Node?.Tag == null)
@@ -259,7 +294,6 @@ namespace ContextForge
             UpdateDisplays();
         }
 
-        // Single method to update both displays synchronously
         private void UpdateDisplays()
         {
             UpdateCheckedDirectoriesDisplay();
@@ -289,7 +323,6 @@ namespace ContextForge
             return fullPath;
         }
 
-        // Synchronous method - no async complications
         private void UpdateCodeResults()
         {
             StringBuilder sb = new();
@@ -338,19 +371,6 @@ namespace ContextForge
             foreach (DirectoryInfo subdir in dirInfo.GetDirectories())
             {
                 TraverseDirectory(subdir.FullName, sb, indentLevel + 1);
-            }
-        }
-
-        private void BtnLoadExclusions_Click(object sender, EventArgs e)
-        {
-            LoadExclusions();
-            MessageBox.Show("Exclusions loaded successfully!", "Load Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            if (!string.IsNullOrEmpty(currentRootPath))
-            {
-                PopulateTreeView(currentRootPath);
-                RestoreTreeState(tvSolutionStructure.Nodes, []);
-                UpdateDisplays();
             }
         }
 

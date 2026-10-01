@@ -115,6 +115,7 @@ namespace ContextForge
             refreshMenuItem.Enabled = hasRoot;
             btnRefresh.Enabled = hasRoot;
             clearMenuItem.Enabled = hasRoot;
+            btnClear.Enabled = hasRoot;
         }
 
         private void RebuildTree()

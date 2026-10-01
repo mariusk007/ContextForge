@@ -33,6 +33,8 @@
             tableLayoutPanel3 = new TableLayoutPanel();
             txtFilter = new TextBox();
             btnRefresh = new Button();
+            btnClear = new Button();
+            pnlHeaderSpacer = new Panel();
             btnCopyStructure = new Button();
             btnCopyCode = new Button();
             pnlStructureHeader = new Panel();
@@ -172,6 +174,22 @@
             btnRefresh.UseVisualStyleBackColor = true;
             btnRefresh.Click += RefreshMenuItem_Click;
             // 
+            // pnlHeaderSpacer
+            // 
+            pnlHeaderSpacer.Dock = DockStyle.Left;
+            pnlHeaderSpacer.Name = "pnlHeaderSpacer";
+            pnlHeaderSpacer.Size = new Size(6, 23);
+            // 
+            // btnClear
+            // 
+            btnClear.Dock = DockStyle.Left;
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(110, 23);
+            btnClear.TabIndex = 5;
+            btnClear.Text = "Clear Selection";
+            btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += ClearMenuItem_Click;
+            // 
             // btnCopyStructure
             // 
             btnCopyStructure.Dock = DockStyle.Right;
@@ -185,6 +203,8 @@
             // pnlStructureHeader
             // 
             pnlStructureHeader.Controls.Add(btnCopyStructure);
+            pnlStructureHeader.Controls.Add(btnClear);
+            pnlStructureHeader.Controls.Add(pnlHeaderSpacer);
             pnlStructureHeader.Controls.Add(btnRefresh);
             pnlStructureHeader.Dock = DockStyle.Fill;
             pnlStructureHeader.Margin = new Padding(0);
@@ -263,6 +283,8 @@
         private TableLayoutPanel tableLayoutPanel3;
         private TextBox txtFilter;
         private Button btnRefresh;
+        private Button btnClear;
+        private Panel pnlHeaderSpacer;
         private Button btnCopyStructure;
         private Button btnCopyCode;
         private Panel pnlStructureHeader;

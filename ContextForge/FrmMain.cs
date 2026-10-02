@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using ContextForge.Dialog;
 
 namespace ContextForge
@@ -30,6 +30,34 @@ namespace ContextForge
             KeyDown += FrmMain_KeyDown;
 
             UpdateMenuState();
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            BackColor = Theme.Background;
+            tableLayoutPanel3.BackColor = Theme.Background;
+            tlpFilterHeader.BackColor = Theme.Background;
+            tlpTreePanel.BackColor = Theme.Background;
+
+            Theme.StyleMenu(menuStrip);
+
+            foreach (var button in new[] { btnRefresh, btnClear, btnCopyStructure, btnCopyCode })
+                Theme.StyleButton(button);
+
+            txtFilter.BackColor = Theme.Input;
+            txtFilter.ForeColor = Theme.Text;
+            txtFilter.BorderStyle = BorderStyle.FixedSingle;
+
+            Theme.StylePane(tvSolutionStructure);
+            Theme.StylePane(txtSolutionStructureResults);
+            Theme.StylePane(txtCodeResults);
+            tvSolutionStructure.LineColor = Theme.Line;
+
+            flpEntities.BackColor = Theme.Band;
+            flpEntities.Padding = new Padding(4, 0, 4, 0);
+            lblEntities.ForeColor = Theme.Text;
+            lblEntities.Font = new Font(lblEntities.Font, FontStyle.Bold);
         }
 
         #region Menu handlers
@@ -46,6 +74,7 @@ namespace ContextForge
                 PopulateTreeView(currentRootPath);
                 UpdateDisplays();
                 UpdateMenuState();
+                UpdateEntities();
             }
         }
 
@@ -126,6 +155,75 @@ namespace ContextForge
             PopulateTreeView(currentRootPath);
             RestoreTreeState(tvSolutionStructure.Nodes, []);
             UpdateDisplays();
+            UpdateEntities();
+        }
+
+        private void UpdateEntities()
+        {
+            flpEntities.SuspendLayout();
+
+            // Keep the label, remove the old entity buttons
+            foreach (var old in flpEntities.Controls.OfType<Button>().ToList())
+            {
+                flpEntities.Controls.Remove(old);
+                old.Dispose();
+            }
+
+            if (!string.IsNullOrEmpty(currentRootPath))
+            {
+                var entities = EntityAnalyzer.GetTopEntities(currentRootPath, excludedDirectories);
+
+                lblEntities.Text = entities.Count == 0 ? "Top entities: none found" : "Top entities:";
+
+                foreach (var entity in entities)
+                {
+                    var chip = new Button
+                    {
+                        AutoSize = true,
+                        AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                        Margin = new Padding(0, 3, 4, 3),
+                        Text = $"{entity.Name} ({entity.Count})",
+                        Tag = entity.Name
+                    };
+                    Theme.StyleChip(chip);
+                    chip.Click += EntityChip_Click;
+                    flpEntities.Controls.Add(chip);
+                }
+            }
+
+            HighlightActiveChip();
+            flpEntities.ResumeLayout(true);
+        }
+
+        // Shows which entity is currently being used as the filter.
+        private void HighlightActiveChip()
+        {
+            foreach (var chip in flpEntities.Controls.OfType<Button>())
+            {
+                Theme.StyleChip(chip);
+                if (string.Equals(chip.Tag as string, txtFilter.Text, StringComparison.OrdinalIgnoreCase))
+                    Theme.StyleActiveChip(chip);
+            }
+        }
+
+        // Clicking an entity filters the tree to it; clicking the active one clears the filter.
+        private void EntityChip_Click(object? sender, EventArgs e)
+        {
+            if (sender is not Button { Tag: string entity })
+                return;
+
+            txtFilter.Text = string.Equals(txtFilter.Text, entity, StringComparison.OrdinalIgnoreCase)
+                ? string.Empty
+                : entity;
+
+            // TextChanged has already rebuilt the filtered tree; show every match.
+            if (!string.IsNullOrEmpty(txtFilter.Text) && tvSolutionStructure.Nodes.Count > 0)
+            {
+                tvSolutionStructure.BeginUpdate();
+                tvSolutionStructure.ExpandAll();
+                tvSolutionStructure.Nodes[0].EnsureVisible();
+                tvSolutionStructure.EndUpdate();
+            }
         }
 
         #endregion
@@ -143,6 +241,7 @@ namespace ContextForge
         {
             currentFilter = txtFilter.Text;
             ApplyFilter();
+            HighlightActiveChip();
         }
 
         private void FrmMain_KeyDown(object? sender, KeyEventArgs e)

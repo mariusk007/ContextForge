@@ -37,10 +37,15 @@
             btnCopyStructure = new Button();
             btnCopyCode = new Button();
             tlpFilterHeader = new TableLayoutPanel();
+            flpEntities = new FlowLayoutPanel();
+            tlpTreePanel = new TableLayoutPanel();
+            lblEntities = new Label();
             editMenu = new ToolStripMenuItem();
             copyStructureMenuItem = new ToolStripMenuItem();
             copyCodeMenuItem = new ToolStripMenuItem();
             tlpFilterHeader.SuspendLayout();
+            flpEntities.SuspendLayout();
+            tlpTreePanel.SuspendLayout();
             menuStrip.SuspendLayout();
             tableLayoutPanel3.SuspendLayout();
             SuspendLayout();
@@ -152,6 +157,7 @@
             // 
             tvSolutionStructure.BackColor = Color.DimGray;
             tvSolutionStructure.Dock = DockStyle.Fill;
+            tvSolutionStructure.Margin = new Padding(0);
             tvSolutionStructure.ForeColor = Color.Black;
             tvSolutionStructure.Name = "tvSolutionStructure";
             tvSolutionStructure.TabIndex = 1;
@@ -222,6 +228,39 @@
             btnCopyCode.UseVisualStyleBackColor = true;
             btnCopyCode.Click += CopyCode_Click;
             // 
+            // lblEntities
+            // 
+            lblEntities.AutoSize = true;
+            lblEntities.ForeColor = Color.Gainsboro;
+            lblEntities.Margin = new Padding(0, 6, 6, 0);
+            lblEntities.Name = "lblEntities";
+            lblEntities.Text = "Top entities:";
+            // 
+            // flpEntities
+            // 
+            flpEntities.AutoSize = true;
+            flpEntities.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flpEntities.Controls.Add(lblEntities);
+            flpEntities.Dock = DockStyle.Fill;
+            flpEntities.Margin = new Padding(0);
+            flpEntities.MinimumSize = new Size(0, 29);
+            flpEntities.Name = "flpEntities";
+            flpEntities.TabIndex = 7;
+            flpEntities.WrapContents = true;
+            // 
+            // tlpTreePanel
+            // 
+            tlpTreePanel.ColumnCount = 1;
+            tlpTreePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpTreePanel.Controls.Add(flpEntities, 0, 0);
+            tlpTreePanel.Controls.Add(tvSolutionStructure, 0, 1);
+            tlpTreePanel.Dock = DockStyle.Fill;
+            tlpTreePanel.Name = "tlpTreePanel";
+            tlpTreePanel.RowCount = 2;
+            tlpTreePanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlpTreePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpTreePanel.TabIndex = 1;
+            // 
             // tableLayoutPanel3
             // 
             tableLayoutPanel3.BackColor = Color.Transparent;
@@ -232,7 +271,7 @@
             tableLayoutPanel3.Controls.Add(tlpFilterHeader, 0, 0);
             tableLayoutPanel3.Controls.Add(btnCopyStructure, 1, 0);
             tableLayoutPanel3.Controls.Add(btnCopyCode, 2, 0);
-            tableLayoutPanel3.Controls.Add(tvSolutionStructure, 0, 1);
+            tableLayoutPanel3.Controls.Add(tlpTreePanel, 0, 1);
             tableLayoutPanel3.Controls.Add(txtSolutionStructureResults, 1, 1);
             tableLayoutPanel3.Controls.Add(txtCodeResults, 2, 1);
             tableLayoutPanel3.Dock = DockStyle.Fill;
@@ -260,6 +299,10 @@
             menuStrip.PerformLayout();
             tlpFilterHeader.ResumeLayout(false);
             tlpFilterHeader.PerformLayout();
+            flpEntities.ResumeLayout(false);
+            flpEntities.PerformLayout();
+            tlpTreePanel.ResumeLayout(false);
+            tlpTreePanel.PerformLayout();
             tableLayoutPanel3.ResumeLayout(false);
             tableLayoutPanel3.PerformLayout();
             ResumeLayout(false);
@@ -288,6 +331,9 @@
         private Button btnCopyStructure;
         private Button btnCopyCode;
         private TableLayoutPanel tlpFilterHeader;
+        private FlowLayoutPanel flpEntities;
+        private TableLayoutPanel tlpTreePanel;
+        private Label lblEntities;
         private ToolStripMenuItem editMenu;
         private ToolStripMenuItem copyStructureMenuItem;
         private ToolStripMenuItem copyCodeMenuItem;

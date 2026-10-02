@@ -34,14 +34,13 @@
             txtFilter = new TextBox();
             btnRefresh = new Button();
             btnClear = new Button();
-            pnlHeaderSpacer = new Panel();
             btnCopyStructure = new Button();
             btnCopyCode = new Button();
-            pnlStructureHeader = new Panel();
+            tlpFilterHeader = new TableLayoutPanel();
             editMenu = new ToolStripMenuItem();
             copyStructureMenuItem = new ToolStripMenuItem();
             copyCodeMenuItem = new ToolStripMenuItem();
-            pnlStructureHeader.SuspendLayout();
+            tlpFilterHeader.SuspendLayout();
             menuStrip.SuspendLayout();
             tableLayoutPanel3.SuspendLayout();
             SuspendLayout();
@@ -159,40 +158,37 @@
             // 
             // txtFilter
             // 
-            txtFilter.Dock = DockStyle.Fill;
+            txtFilter.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtFilter.Margin = new Padding(0, 0, 3, 0);
             txtFilter.Name = "txtFilter";
             txtFilter.PlaceholderText = "Filter files and folders";
             txtFilter.TabIndex = 0;
             // 
             // btnRefresh
             // 
-            btnRefresh.Dock = DockStyle.Left;
+            btnRefresh.Anchor = AnchorStyles.None;
+            btnRefresh.Margin = new Padding(3, 0, 3, 0);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(90, 23);
-            btnRefresh.TabIndex = 4;
+            btnRefresh.TabIndex = 1;
             btnRefresh.Text = "Refresh";
             btnRefresh.UseVisualStyleBackColor = true;
             btnRefresh.Click += RefreshMenuItem_Click;
             // 
-            // pnlHeaderSpacer
-            // 
-            pnlHeaderSpacer.Dock = DockStyle.Left;
-            pnlHeaderSpacer.Name = "pnlHeaderSpacer";
-            pnlHeaderSpacer.Size = new Size(6, 23);
-            // 
             // btnClear
             // 
-            btnClear.Dock = DockStyle.Left;
+            btnClear.Anchor = AnchorStyles.None;
+            btnClear.Margin = new Padding(3, 0, 0, 0);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(110, 23);
-            btnClear.TabIndex = 5;
+            btnClear.TabIndex = 2;
             btnClear.Text = "Clear Selection";
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += ClearMenuItem_Click;
             // 
             // btnCopyStructure
             // 
-            btnCopyStructure.Dock = DockStyle.Right;
+            btnCopyStructure.Anchor = AnchorStyles.Right;
             btnCopyStructure.Name = "btnCopyStructure";
             btnCopyStructure.Size = new Size(110, 23);
             btnCopyStructure.TabIndex = 5;
@@ -200,17 +196,21 @@
             btnCopyStructure.UseVisualStyleBackColor = true;
             btnCopyStructure.Click += CopyStructure_Click;
             // 
-            // pnlStructureHeader
+            // tlpFilterHeader
             // 
-            pnlStructureHeader.Controls.Add(btnCopyStructure);
-            pnlStructureHeader.Controls.Add(btnClear);
-            pnlStructureHeader.Controls.Add(pnlHeaderSpacer);
-            pnlStructureHeader.Controls.Add(btnRefresh);
-            pnlStructureHeader.Dock = DockStyle.Fill;
-            pnlStructureHeader.Margin = new Padding(0);
-            pnlStructureHeader.Name = "pnlStructureHeader";
-            pnlStructureHeader.Padding = new Padding(3);
-            pnlStructureHeader.TabIndex = 4;
+            tlpFilterHeader.ColumnCount = 3;
+            tlpFilterHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpFilterHeader.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tlpFilterHeader.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tlpFilterHeader.Controls.Add(txtFilter, 0, 0);
+            tlpFilterHeader.Controls.Add(btnRefresh, 1, 0);
+            tlpFilterHeader.Controls.Add(btnClear, 2, 0);
+            tlpFilterHeader.Dock = DockStyle.Fill;
+            tlpFilterHeader.Margin = new Padding(3, 3, 3, 0);
+            tlpFilterHeader.Name = "tlpFilterHeader";
+            tlpFilterHeader.RowCount = 1;
+            tlpFilterHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpFilterHeader.TabIndex = 0;
             // 
             // btnCopyCode
             // 
@@ -229,8 +229,8 @@
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33333F));
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33333F));
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33333F));
-            tableLayoutPanel3.Controls.Add(txtFilter, 0, 0);
-            tableLayoutPanel3.Controls.Add(pnlStructureHeader, 1, 0);
+            tableLayoutPanel3.Controls.Add(tlpFilterHeader, 0, 0);
+            tableLayoutPanel3.Controls.Add(btnCopyStructure, 1, 0);
             tableLayoutPanel3.Controls.Add(btnCopyCode, 2, 0);
             tableLayoutPanel3.Controls.Add(tvSolutionStructure, 0, 1);
             tableLayoutPanel3.Controls.Add(txtSolutionStructureResults, 1, 1);
@@ -258,7 +258,8 @@
             WindowState = FormWindowState.Maximized;
             menuStrip.ResumeLayout(false);
             menuStrip.PerformLayout();
-            pnlStructureHeader.ResumeLayout(false);
+            tlpFilterHeader.ResumeLayout(false);
+            tlpFilterHeader.PerformLayout();
             tableLayoutPanel3.ResumeLayout(false);
             tableLayoutPanel3.PerformLayout();
             ResumeLayout(false);
@@ -284,10 +285,9 @@
         private TextBox txtFilter;
         private Button btnRefresh;
         private Button btnClear;
-        private Panel pnlHeaderSpacer;
         private Button btnCopyStructure;
         private Button btnCopyCode;
-        private Panel pnlStructureHeader;
+        private TableLayoutPanel tlpFilterHeader;
         private ToolStripMenuItem editMenu;
         private ToolStripMenuItem copyStructureMenuItem;
         private ToolStripMenuItem copyCodeMenuItem;

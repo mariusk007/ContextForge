@@ -15,6 +15,11 @@ namespace ContextForge
         // Single source of truth for checked state
         private readonly HashSet<string> checkedPaths = [];
 
+        // Top entities: last scan result, and whether to show it A–Z instead of by count
+        private List<EntityCount> topEntities = [];
+        private bool sortEntitiesAlphabetically;
+        private readonly ToolTip entitiesToolTip = new();
+
         public FrmMain()
         {
             InitializeComponent();
@@ -76,6 +81,9 @@ namespace ContextForge
             flpEntities.Padding = new Padding(4, 0, 4, 0);
             lblEntities.ForeColor = Theme.Text;
             lblEntities.Font = new Font(lblEntities.Font, FontStyle.Bold);
+            lblEntities.Cursor = Cursors.Hand;
+            lblEntities.Click += LblEntities_Click;
+            entitiesToolTip.SetToolTip(lblEntities, "Click to switch between sorting by count and A–Z");
         }
 
         #region Menu handlers
@@ -176,7 +184,24 @@ namespace ContextForge
             UpdateEntities();
         }
 
+        // Rescans the folder. Only needed when the folder or exclusions change.
         private void UpdateEntities()
+        {
+            topEntities = string.IsNullOrEmpty(currentRootPath)
+                ? []
+                : EntityAnalyzer.GetTopEntities(currentRootPath, excludedDirectories);
+
+            RenderEntityChips();
+        }
+
+        private void LblEntities_Click(object? sender, EventArgs e)
+        {
+            sortEntitiesAlphabetically = !sortEntitiesAlphabetically;
+            RenderEntityChips();
+        }
+
+        // Redraws the chips from the last scan in the current sort order (no rescan).
+        private void RenderEntityChips()
         {
             flpEntities.SuspendLayout();
 
@@ -187,26 +212,30 @@ namespace ContextForge
                 old.Dispose();
             }
 
-            if (!string.IsNullOrEmpty(currentRootPath))
+            string sortLabel = sortEntitiesAlphabetically ? "A–Z" : "count";
+            lblEntities.Text = string.IsNullOrEmpty(currentRootPath)
+                ? "Top entities:"
+                : topEntities.Count == 0
+                    ? "Top entities: none found"
+                    : $"Top entities ({sortLabel}) ⇅:";
+
+            var ordered = sortEntitiesAlphabetically
+                ? topEntities.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                : topEntities.OrderByDescending(x => x.Count).ThenBy(x => x.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var entity in ordered)
             {
-                var entities = EntityAnalyzer.GetTopEntities(currentRootPath, excludedDirectories);
-
-                lblEntities.Text = entities.Count == 0 ? "Top entities: none found" : "Top entities:";
-
-                foreach (var entity in entities)
+                var chip = new Button
                 {
-                    var chip = new Button
-                    {
-                        AutoSize = true,
-                        AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                        Margin = new Padding(0, 3, 4, 3),
-                        Text = $"{entity.Name} ({entity.Count})",
-                        Tag = entity.Name
-                    };
-                    Theme.StyleChip(chip);
-                    chip.Click += EntityChip_Click;
-                    flpEntities.Controls.Add(chip);
-                }
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    Margin = new Padding(0, 3, 4, 3),
+                    Text = $"{entity.Name} ({entity.Count})",
+                    Tag = entity.Name
+                };
+                Theme.StyleChip(chip);
+                chip.Click += EntityChip_Click;
+                flpEntities.Controls.Add(chip);
             }
 
             HighlightActiveChip();

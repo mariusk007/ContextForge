@@ -18,6 +18,7 @@ namespace ContextForge
         public static readonly Color Chip = ColorTranslator.FromHtml("#3a4a57"); // entity buttons
         public static readonly Color ChipHover = ColorTranslator.FromHtml("#505f6a");
         public static readonly Color ChipActive = ColorTranslator.FromHtml("#67747e"); // entity in use as filter
+        public static readonly Color Accent = ColorTranslator.FromHtml("#8ab4d8"); // file headers in code output
         public static readonly Color Line = ColorTranslator.FromHtml("#7e8992"); // tree lines, subtle accents
 
         // Text

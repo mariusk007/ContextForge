@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using ContextForge.Dialog;
 
 namespace ContextForge
@@ -29,8 +30,25 @@ namespace ContextForge
             KeyPreview = true;
             KeyDown += FrmMain_KeyDown;
 
+            txtSolutionStructureResults.TextChanged += (_, _) => UpdateCopyState();
+            txtCodeResults.TextChanged += (_, _) => UpdateCopyState();
+
             UpdateMenuState();
+            UpdateCopyState();
             ApplyTheme();
+        }
+
+        // Copy actions are only available when their box has something to copy.
+        private void UpdateCopyState()
+        {
+            bool hasStructure = txtSolutionStructureResults.TextLength > 0;
+            bool hasCode = txtCodeResults.TextLength > 0;
+
+            btnCopyStructure.Enabled = hasStructure;
+            copyStructureMenuItem.Enabled = hasStructure;
+
+            btnCopyCode.Enabled = hasCode;
+            copyCodeMenuItem.Enabled = hasCode;
         }
 
         private void ApplyTheme()
@@ -446,6 +464,35 @@ namespace ContextForge
             }
 
             txtCodeResults.Text = sb.ToString();
+            HighlightFileHeaders();
+        }
+
+        // Matches the 3-line block: dashes / "File: path" / dashes. RichTextBox stores newlines as \n.
+        private static readonly Regex FileHeaderPattern =
+            new(@"^-{80}\n(File: .*)\n-{80}$", RegexOptions.Multiline | RegexOptions.Compiled);
+
+        private void HighlightFileHeaders()
+        {
+            var text = txtCodeResults.Text;
+            if (text.Length == 0)
+                return;
+
+            using var boldFont = new Font(txtCodeResults.Font, FontStyle.Bold);
+
+            foreach (Match match in FileHeaderPattern.Matches(text))
+            {
+                // Divider lines
+                txtCodeResults.Select(match.Index, match.Length);
+                txtCodeResults.SelectionColor = Theme.Line;
+
+                // "File: ..." line
+                var fileLine = match.Groups[1];
+                txtCodeResults.Select(fileLine.Index, fileLine.Length);
+                txtCodeResults.SelectionColor = Theme.Accent;
+                txtCodeResults.SelectionFont = boldFont;
+            }
+
+            txtCodeResults.Select(0, 0);
         }
 
         private void DisplaySelectedDirectoryOnly(string path, StringBuilder sb)

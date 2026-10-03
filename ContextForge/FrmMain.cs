@@ -18,6 +18,7 @@ namespace ContextForge
         // Top entities: last scan result, and whether to show it A–Z instead of by count
         private List<EntityCount> topEntities = [];
         private bool sortEntitiesAlphabetically;
+        private const int MaxTopEntities = 20;
         private readonly ToolTip entitiesToolTip = new();
 
         public FrmMain()
@@ -189,7 +190,7 @@ namespace ContextForge
         {
             topEntities = string.IsNullOrEmpty(currentRootPath)
                 ? []
-                : EntityAnalyzer.GetTopEntities(currentRootPath, excludedDirectories);
+                : EntityAnalyzer.GetTopEntities(currentRootPath, excludedDirectories, MaxTopEntities);
 
             RenderEntityChips();
         }
